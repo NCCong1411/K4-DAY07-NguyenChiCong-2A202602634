@@ -29,7 +29,9 @@ class KnowledgeBaseAgent:
         prompt = (
             "Answer using only the context below. Cite the supporting source number "
             "in square brackets, for example [1]. If the context does not contain "
-            "the answer, say that you could not find it in the provided context.\n\n"
+            "the answer, say that you could not find it in the provided context. "
+            "Give a complete answer: include every relevant step, condition, deadline, "
+            "or number that appears in the provided context; do not omit steps in a process.\n\n"
             f"Context:\n{context}\n\n"
             f"Question: {question}\n"
             "Answer:"

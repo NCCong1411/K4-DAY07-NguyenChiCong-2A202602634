@@ -88,6 +88,48 @@ Vượt qua bộ kiểm thử là điều kiện tính điểm phần này.
 ```
 $ pytest tests/ -v
 ============================= test session starts =============================
+tests/test_solution.py::TestProjectStructure::test_root_main_entrypoint_exists PASSED
+tests/test_solution.py::TestProjectStructure::test_src_package_exists PASSED
+tests/test_solution.py::TestClassBasedInterfaces::test_chunker_classes_exist PASSED
+tests/test_solution.py::TestClassBasedInterfaces::test_mock_embedder_exists PASSED
+tests/test_solution.py::TestFixedSizeChunker::test_chunks_respect_size PASSED
+tests/test_solution.py::TestFixedSizeChunker::test_correct_number_of_chunks_no_overlap PASSED
+tests/test_solution.py::TestFixedSizeChunker::test_empty_text_returns_empty_list PASSED
+tests/test_solution.py::TestFixedSizeChunker::test_no_overlap_no_shared_content PASSED
+tests/test_solution.py::TestFixedSizeChunker::test_overlap_creates_shared_content PASSED
+tests/test_solution.py::TestFixedSizeChunker::test_returns_list PASSED
+tests/test_solution.py::TestFixedSizeChunker::test_single_chunk_if_text_shorter PASSED
+tests/test_solution.py::TestSentenceChunker::test_chunks_are_strings PASSED
+tests/test_solution.py::TestSentenceChunker::test_respects_max_sentences PASSED
+tests/test_solution.py::TestSentenceChunker::test_returns_list PASSED
+tests/test_solution.py::TestSentenceChunker::test_single_sentence_max_gives_many_chunks PASSED
+tests/test_solution.py::TestRecursiveChunker::test_chunks_within_size_when_possible PASSED
+tests/test_solution.py::TestRecursiveChunker::test_empty_separators_falls_back_gracefully PASSED
+tests/test_solution.py::TestRecursiveChunker::test_handles_double_newline_separator PASSED
+tests/test_solution.py::TestRecursiveChunker::test_returns_list PASSED
+tests/test_solution.py::TestEmbeddingStore::test_add_documents_increases_size PASSED
+tests/test_solution.py::TestEmbeddingStore::test_add_more_increases_further PASSED
+tests/test_solution.py::TestEmbeddingStore::test_initial_size_is_zero PASSED
+tests/test_solution.py::TestEmbeddingStore::test_search_results_have_content_key PASSED
+tests/test_solution.py::TestEmbeddingStore::test_search_results_have_score_key PASSED
+tests/test_solution.py::TestEmbeddingStore::test_search_results_sorted_by_score_descending PASSED
+tests/test_solution.py::TestEmbeddingStore::test_search_returns_at_most_top_k PASSED
+tests/test_solution.py::TestEmbeddingStore::test_search_returns_list PASSED
+tests/test_solution.py::TestKnowledgeBaseAgent::test_answer_non_empty PASSED
+tests/test_solution.py::TestKnowledgeBaseAgent::test_answer_returns_string PASSED
+tests/test_solution.py::TestComputeSimilarity::test_identical_vectors_return_1 PASSED
+tests/test_solution.py::TestComputeSimilarity::test_opposite_vectors_return_minus_1 PASSED
+tests/test_solution.py::TestComputeSimilarity::test_orthogonal_vectors_return_0 PASSED
+tests/test_solution.py::TestComputeSimilarity::test_zero_vector_returns_0 PASSED
+tests/test_solution.py::TestCompareChunkingStrategies::test_counts_are_positive PASSED
+tests/test_solution.py::TestCompareChunkingStrategies::test_each_strategy_has_count_and_avg_length PASSED
+tests/test_solution.py::TestCompareChunkingStrategies::test_returns_three_strategies PASSED
+tests/test_solution.py::TestEmbeddingStoreSearchWithFilter::test_filter_by_department PASSED
+tests/test_solution.py::TestEmbeddingStoreSearchWithFilter::test_no_filter_returns_all_candidates PASSED
+tests/test_solution.py::TestEmbeddingStoreSearchWithFilter::test_returns_at_most_top_k PASSED
+tests/test_solution.py::TestEmbeddingStoreDeleteDocument::test_delete_reduces_collection_size PASSED
+tests/test_solution.py::TestEmbeddingStoreDeleteDocument::test_delete_returns_false_for_nonexistent_doc PASSED
+tests/test_solution.py::TestEmbeddingStoreDeleteDocument::test_delete_returns_true_for_existing_doc PASSED
 ============================== 42 passed in 0.06s ==============================
 ```
 
@@ -117,15 +159,15 @@ Chạy **5 câu hỏi đánh giá của nhóm** trên mã nguồn cá nhân củ
 
 | #   | Câu hỏi (Query) | Top-1 Chunk truy xuất được (tóm tắt) | Điểm Score | Có liên quan không? (Relevant) | Câu trả lời của Agent (tóm tắt) |
 | --- | --------------- | ------------------------------------ | ---------- | ------------------------------ | ------------------------------- |
-| 1 | Quy trình đăng ký hai lớp trùng giờ? | `course-registration`: Course Time Conflict Request trên SIO, cần chuỗi phê duyệt. | 0.764 | Có, top-1 chứa quy trình. | Gửi request; advisor và giảng viên phê duyệt, sau đó chấp nhận điều kiện để đăng ký. |
-| 2 | Sinh viên năm nhất đăng ký ngày nào? | `registration-start-times`: nêu thứ tự ngày đăng ký theo năm học. | 0.760 | Có, top-1 chứa “first-years register on Friday”. | Thứ Sáu trong kỳ thu và xuân. |
-| 3 | Cần làm gì trước khi dùng voucher? | `course-changes`: tư vấn advisor và voucher process. | 0.783 | Có, top-1 chứa thao tác cần làm. | Trao đổi primary advisor; advisor nhập S3 và sinh viên xác nhận trong 24 giờ. |
-| 4 | Undergraduate có bao nhiêu voucher? | `course-changes`: “three vouchers” và “one voucher per semester”. | 0.842 | Có, top-1 chứa cả hai con số. | Ba voucher trong toàn khóa; tối đa một voucher mỗi kỳ. |
-| 5 | Tôi có giờ bắt đầu đăng ký cụ thể không? | `registration-start-times`: start time ở Registration/Plan Schedule trong SIO. | 0.618 | Có, top-1 chứa đáp án sinh viên. | Có; xem trong SIO. Undergraduate được gán theo ba số cuối ID Card. |
+| 1 | Quy trình đăng ký hai lớp trùng giờ? | `course-registration`: Course Time Conflict Request trên SIO, điều kiện và hạn gửi. | 0.764 | Có, top-1 chứa request; top-2 chứa chấp nhận điều kiện/đăng ký. | Agent: gửi request trên SIO, đáp ứng prerequisites/reservations, chấp nhận điều kiện rồi đăng ký; gửi trước hạn add ít nhất 5 ngày `[1][2]`. |
+| 2 | Sinh viên năm nhất đăng ký ngày nào? | `registration-start-times`: lịch đăng ký theo năm học. | 0.760 | Có, top-1 nêu “first-years register on Friday”. | Agent: Thứ Sáu trong kỳ thu và xuân `[1]`. |
+| 3 | Cần làm gì trước khi dùng voucher? | `course-changes`: advisor và voucher process. | 0.783 | Có, top-1 chứa thao tác trước khi dùng. | Agent: phải trao đổi với primary academic advisor trước `[1][2]`. |
+| 4 | Undergraduate có bao nhiêu voucher? | `course-changes`: “three vouchers” và “one voucher per semester”. | 0.842 | Có, top-1 chứa cả hai con số. | Agent: ba voucher toàn khóa; tối đa một voucher mỗi kỳ, kể cả hè `[1]`. |
+| 5 | Tôi có giờ bắt đầu đăng ký cụ thể không? | `registration-start-times`: start time ở Registration/Plan Schedule trong SIO. | 0.618 | Có, top-1 chứa đáp án sinh viên. | Agent: Có; giờ được gán theo ba số cuối ID Card và xem trên Registration/Plan Schedule trong SIO `[1][3]`. |
 
 **Bao nhiêu câu hỏi trả về chunk có liên quan trong top-3?** 5 / 5
 
-**Thiết lập & kiểm tra A/B:** Tôi dùng `HeadingChunker → RecursiveChunker`, `text-embedding-3-small`, 75 chunks và top_k=3. Với query 3–5, tôi đã chạy cả `metadata_filter={"audience": "student"}` và không filter; output đầy đủ ở `ket_qua_benchmark.txt`. Filter được áp dụng trước retrieval, nhưng top-3 quan sát được chưa đổi vì các chunk `student` đã có điểm semantic cao nhất. Đây là giới hạn của bộ query hiện tại: để chứng minh lợi ích thứ hạng rõ hơn, nhóm cần một query mơ hồ hơn giữa `student` và `faculty/staff` có đáp án khác nhau.
+**Thiết lập & kiểm tra A/B:** Tôi dùng `HeadingChunker → RecursiveChunker`, `text-embedding-3-small`, 75 chunks và top_k=3. Với query 3–5, tôi đã chạy cả `metadata_filter={"audience": "student"}` và không filter; output đầy đủ ở `ket_qua_benchmark.txt`. Tôi cũng chạy `python bench.py --chunker heading --filter-mode on --with-agent`; agent OpenAI trả lời có citation `[1]`, `[2]`, ... như bảng trên. Filter được áp dụng trước retrieval, nhưng top-3 quan sát được chưa đổi vì các chunk `student` đã có điểm semantic cao nhất. Đây là giới hạn của bộ query hiện tại: để chứng minh lợi ích thứ hạng rõ hơn, nhóm cần một query mơ hồ hơn giữa `student` và `faculty/staff` có đáp án khác nhau.
 
 **Điều hay nhất tôi học được từ thành viên khác / nhóm khác (qua demo):**
 

@@ -14,6 +14,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from src.agent import KnowledgeBaseAgent
 from main import parse_front_matter
 from src.chunking import (
     ChunkingStrategyComparator,
@@ -32,6 +33,7 @@ if hasattr(sys.stdout, "reconfigure"):
 PROJECT_DIR = Path(__file__).parent
 CORPUS_DIR = PROJECT_DIR / "data" / "university_services"
 CACHE_PATH = PROJECT_DIR / ".cache" / "embedding_cache.json"
+AGENT_CACHE_PATH = PROJECT_DIR / ".cache" / "agent_answer_cache.json"
 
 # Exactly five shared queries.  Gold answers were copied from the cited source files.
 BENCHMARKS = [
@@ -137,6 +139,43 @@ def get_embedder(provider: str):
     return _mock_embed
 
 
+def get_openai_llm():
+    """Return a small grounded-answer LLM function, cached by the full prompt."""
+    if not os.getenv("OPENAI_API_KEY"):
+        raise RuntimeError("OPENAI_API_KEY is missing. The agent answer cannot be generated.")
+    from openai import OpenAI
+
+    client = OpenAI()
+    model = os.getenv("OPENAI_CHAT_MODEL", "gpt-4o-mini")
+    cache = json.loads(AGENT_CACHE_PATH.read_text(encoding="utf-8")) if AGENT_CACHE_PATH.exists() else {}
+
+    def llm_fn(prompt: str) -> str:
+        key = hashlib.sha256(f"{model}:{prompt}".encode("utf-8")).hexdigest()
+        if key not in cache:
+            response = client.chat.completions.create(
+                model=model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0,
+            )
+            cache[key] = response.choices[0].message.content or ""
+            AGENT_CACHE_PATH.parent.mkdir(exist_ok=True)
+            AGENT_CACHE_PATH.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
+        return cache[key]
+
+    return llm_fn
+
+
+class FilteredStoreView:
+    """Lets KnowledgeBaseAgent use the same pre-filtered candidates as the benchmark."""
+
+    def __init__(self, store: EmbeddingStore, metadata_filter: dict | None) -> None:
+        self.store = store
+        self.metadata_filter = metadata_filter
+
+    def search(self, query: str, top_k: int = 3) -> list[dict]:
+        return self.store.search_with_filter(query, top_k=top_k, metadata_filter=self.metadata_filter)
+
+
 def load_corpus(chunker_name: str) -> list[Document]:
     chunker = get_chunker(chunker_name)
     documents: list[Document] = []
@@ -160,13 +199,14 @@ def load_corpus(chunker_name: str) -> list[Document]:
     return documents
 
 
-def run(chunker_name: str, provider: str, filter_mode: str = "on") -> None:
+def run(chunker_name: str, provider: str, filter_mode: str = "on", with_agent: bool = False) -> None:
     docs = load_corpus(chunker_name)
     embedder = get_embedder(provider)
     store = EmbeddingStore("university_registration_benchmark", embedding_fn=embedder)
     store.add_documents(docs)
     print(f"Chunker: {chunker_name}; files: 9; chunks stored: {store.get_collection_size()}")
     print(f"Embedding: {getattr(embedder, '_backend_name', type(embedder).__name__)}")
+    llm_fn = get_openai_llm() if with_agent else None
 
     for number, benchmark in enumerate(BENCHMARKS, start=1):
         metadata_filter = benchmark["metadata_filter"] if filter_mode == "on" else None
@@ -179,6 +219,9 @@ def run(chunker_name: str, provider: str, filter_mode: str = "on") -> None:
         for rank, result in enumerate(results, start=1):
             preview = result["content"].replace("\n", " ")[:180]
             print(f"  {rank}. score={result['score']:.3f} doc_id={result['metadata']['doc_id']} :: {preview}...")
+        if llm_fn:
+            agent = KnowledgeBaseAgent(FilteredStoreView(store, metadata_filter), llm_fn)
+            print(f"Agent answer: {agent.answer(benchmark['query'], top_k=3)}")
 
 
 def print_baseline() -> None:
@@ -219,13 +262,14 @@ def main() -> None:
     )
     parser.add_argument("--baseline", action="store_true", help="Print baseline for the first three files, then exit.")
     parser.add_argument("--similarity", action="store_true", help="Print five individual cosine-similarity measurements.")
+    parser.add_argument("--with-agent", action="store_true", help="Generate grounded OpenAI agent answers for the five queries.")
     args = parser.parse_args()
     if args.baseline:
         print_baseline()
     elif args.similarity:
         print_similarity_pairs(args.provider)
     else:
-        run(args.chunker, args.provider, args.filter_mode)
+        run(args.chunker, args.provider, args.filter_mode, args.with_agent)
 
 
 if __name__ == "__main__":
