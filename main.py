@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 import os
+import re
 import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
 from src.agent import KnowledgeBaseAgent
+from src.chunking import HeadingChunker
 from src.embeddings import (
     EMBEDDING_PROVIDER_ENV,
     GEMINI_EMBEDDING_MODEL,
@@ -20,18 +25,35 @@ from src.embeddings import (
 from src.models import Document
 from src.store import EmbeddingStore
 
-SAMPLE_FILES = [
-    "data/python_intro.txt",
-    "data/vector_store_notes.md",
-    "data/rag_system_design.md",
-    "data/customer_support_playbook.txt",
-    "data/chunking_experiment_report.md",
-    "data/vi_retrieval_notes.md",
-]
+PROJECT_DIR = Path(__file__).parent
+CORPUS_DIR = PROJECT_DIR / "data" / "university_services"
+SAMPLE_FILES = [str(path.relative_to(PROJECT_DIR)) for path in sorted(CORPUS_DIR.glob("*.md"))]
+
+
+def parse_front_matter(markdown: str) -> tuple[dict[str, str], str]:
+    """Return YAML-like front matter metadata and the Markdown body."""
+    if not markdown.startswith("---"):
+        return {}, markdown
+
+    parts = markdown.split("---", 2)
+    if len(parts) < 3:
+        return {}, markdown
+
+    metadata: dict[str, str] = {}
+    for line in parts[1].splitlines():
+        key, separator, value = line.partition(":")
+        if separator:
+            metadata[key.strip()] = value.strip().strip('"')
+    return metadata, parts[2].lstrip("\r\n")
+
+
+def chunk_markdown_by_heading(text: str, chunk_size: int = 500) -> list[str]:
+    """Split Markdown by heading first, then recursively split long sections."""
+    return HeadingChunker(chunk_size=chunk_size).chunk(text)
 
 
 def load_documents_from_files(file_paths: list[str]) -> list[Document]:
-    """Load documents from file paths for the manual demo."""
+    """Load files, preserve metadata, and create one Document for each chunk."""
     allowed_extensions = {".md", ".txt"}
     documents: list[Document] = []
 
@@ -46,14 +68,26 @@ def load_documents_from_files(file_paths: list[str]) -> list[Document]:
             print(f"Skipping missing file: {path}")
             continue
 
-        content = path.read_text(encoding="utf-8")
-        documents.append(
-            Document(
-                id=path.stem,
-                content=content,
-                metadata={"source": str(path), "extension": path.suffix.lower()},
-            )
+        raw_content = path.read_text(encoding="utf-8")
+        metadata, content = parse_front_matter(raw_content)
+        parent_doc_id = metadata.pop("doc_id", path.stem)
+        metadata.update(
+            {
+                "source": str(path),
+                "extension": path.suffix.lower(),
+                "parent_doc_id": parent_doc_id,
+                "chunking_strategy": "heading_recursive",
+            }
         )
+
+        for index, chunk in enumerate(chunk_markdown_by_heading(content)):
+            documents.append(
+                Document(
+                    id=f"{parent_doc_id}_chunk_{index}",
+                    content=chunk,
+                    metadata={**metadata, "chunk_index": index},
+                )
+            )
 
     return documents
 
@@ -81,7 +115,7 @@ def run_manual_demo(question: str | None = None, sample_files: list[str] | None 
         print("  python3 main.py")
         return 1
 
-    print(f"\nLoaded {len(docs)} documents")
+    print(f"\nLoaded {len(docs)} chunks")
     for doc in docs:
         print(f"  - {doc.id}: {doc.metadata['source']}")
 
@@ -110,7 +144,7 @@ def run_manual_demo(question: str | None = None, sample_files: list[str] | None 
     store = EmbeddingStore(collection_name="manual_test_store", embedding_fn=embedder)
     store.add_documents(docs)
 
-    print(f"\nStored {store.get_collection_size()} documents in EmbeddingStore")
+    print(f"\nStored {store.get_collection_size()} chunks in EmbeddingStore")
     print("\n=== EmbeddingStore Search Test ===")
     print(f"Query: {query}")
     search_results = store.search(query, top_k=3)
