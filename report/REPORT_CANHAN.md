@@ -53,6 +53,10 @@ Giải thích cách tiếp cận của bạn khi lập trình (implement) các p
 
 ### Các hàm chia nhỏ (Chunking Functions)
 
+**`FixedSizeChunker.chunk`** — chiến lược tôi dùng khi benchmark:
+
+> Tôi dùng `chunk_size=500` và `overlap=50`: mỗi chunk có độ dài ổn định, còn 50 ký tự chồng lấp giữ một phần ngữ cảnh ở ranh giới. Đây là baseline công bằng để so sánh trực tiếp với chunk theo heading của thành viên khác; nhược điểm là chunk vẫn có thể bắt đầu hoặc kết thúc giữa từ/câu.
+
 **`SentenceChunker.chunk`** — hướng tiếp cận:
 
 > Tôi dùng regex `(?<=[.!?])\s+` để tách tại khoảng trắng sau dấu kết thúc câu, nhờ đó dấu `.`, `!`, `?` vẫn được giữ lại trong chunk. Text rỗng hoặc chỉ có khoảng trắng trả về `[]`; tuy nhiên cách này chưa phân biệt được chữ viết tắt như `TS.` hoặc số thập phân như `3.14`, nên các trường hợp đó có thể bị tách sai.
@@ -159,19 +163,19 @@ Chạy **5 câu hỏi đánh giá của nhóm** trên mã nguồn cá nhân củ
 
 | #   | Câu hỏi (Query) | Top-1 Chunk truy xuất được (tóm tắt) | Điểm Score | Có liên quan không? (Relevant) | Câu trả lời của Agent (tóm tắt) |
 | --- | --------------- | ------------------------------------ | ---------- | ------------------------------ | ------------------------------- |
-| 1 | Quy trình đăng ký hai lớp trùng giờ? | `course-registration`: Course Time Conflict Request trên SIO, điều kiện và hạn gửi. | 0.764 | Có, top-1 chứa request; top-2 chứa chấp nhận điều kiện/đăng ký. | Agent: gửi request trên SIO, đáp ứng prerequisites/reservations, chấp nhận điều kiện rồi đăng ký; gửi trước hạn add ít nhất 5 ngày `[1][2]`. |
-| 2 | Sinh viên năm nhất đăng ký ngày nào? | `registration-start-times`: lịch đăng ký theo năm học. | 0.760 | Có, top-1 nêu “first-years register on Friday”. | Agent: Thứ Sáu trong kỳ thu và xuân `[1]`. |
-| 3 | Cần làm gì trước khi dùng voucher? | `course-changes`: advisor và voucher process. | 0.783 | Có, top-1 chứa thao tác trước khi dùng. | Agent: phải trao đổi với primary academic advisor trước `[1][2]`. |
-| 4 | Undergraduate có bao nhiêu voucher? | `course-changes`: “three vouchers” và “one voucher per semester”. | 0.842 | Có, top-1 chứa cả hai con số. | Agent: ba voucher toàn khóa; tối đa một voucher mỗi kỳ, kể cả hè `[1]`. |
-| 5 | Tôi có giờ bắt đầu đăng ký cụ thể không? | `registration-start-times`: start time ở Registration/Plan Schedule trong SIO. | 0.618 | Có, top-1 chứa đáp án sinh viên. | Agent: Có; giờ được gán theo ba số cuối ID Card và xem trên Registration/Plan Schedule trong SIO `[1][3]`. |
+| 1 | Quy trình đăng ký hai lớp trùng giờ? | `course-registration`: Course Time Conflict Request; overlap giữ mảnh điều kiện và hạn gửi. | 0.730 | Có, top-1 chứa request; top-2 chứa chấp nhận điều kiện/đăng ký. | Agent: gửi request SIO, advisor xem xét, chấp nhận điều kiện rồi đăng ký; gửi trước hạn add ít nhất 5 ngày `[1][2]`. |
+| 2 | Sinh viên năm nhất đăng ký ngày nào? | `registration-start-times`: lịch đăng ký theo năm học. | 0.683 | Có, top-1 nêu “first-years register on Friday”. | Agent: Thứ Sáu trong kỳ thu và xuân `[1]`. |
+| 3 | Cần làm gì trước khi dùng voucher? | `course-changes`: Voucher Instructions và quy trình S3. | 0.711 | Có, top-1 chứa advisor; top-3 có quy trình voucher. | Agent: trao đổi primary advisor; advisor nhập voucher vào S3 và sinh viên nhận email/xác nhận `[1][3]`. |
+| 4 | Undergraduate có bao nhiêu voucher? | `course-changes`: quy định voucher theo chương trình học. | 0.810 | Có, top-2 chứa “three vouchers” và “one voucher per semester”. | Agent: ba voucher toàn khóa; tối đa một voucher mỗi kỳ, kể cả hè `[1]`. |
+| 5 | Tôi có giờ bắt đầu đăng ký cụ thể không? | `registration-start-times`: start time ở Registration/Plan Schedule trong SIO. | 0.622 | Có, top-1 chứa đáp án sinh viên. | Agent: Có; giờ ngẫu nhiên theo ba số cuối ID Card và xem trên Registration/Plan Schedule trong SIO `[1][2]`. |
 
 **Bao nhiêu câu hỏi trả về chunk có liên quan trong top-3?** 5 / 5
 
-**Thiết lập & kiểm tra A/B:** Tôi dùng `HeadingChunker → RecursiveChunker`, `text-embedding-3-small`, 75 chunks và top_k=3. Với query 3–5, tôi đã chạy cả `metadata_filter={"audience": "student"}` và không filter; output đầy đủ ở `ket_qua_benchmark.txt`. Tôi cũng chạy `python bench.py --chunker heading --filter-mode on --with-agent`; agent OpenAI trả lời có citation `[1]`, `[2]`, ... như bảng trên. Filter được áp dụng trước retrieval, nhưng top-3 quan sát được chưa đổi vì các chunk `student` đã có điểm semantic cao nhất. Đây là giới hạn của bộ query hiện tại: để chứng minh lợi ích thứ hạng rõ hơn, nhóm cần một query mơ hồ hơn giữa `student` và `faculty/staff` có đáp án khác nhau.
+**Thiết lập & kiểm tra A/B:** Tôi dùng `FixedSizeChunker(chunk_size=500, overlap=50)`, `text-embedding-3-small`, 68 chunks và top_k=3. Với query 3–5, tôi đã chạy cả `metadata_filter={"audience": "student"}` và không filter; output đầy đủ ở `ket_qua_benchmark.txt`. Tôi cũng chạy `python bench.py --chunker fixed --filter-mode on --with-agent`; agent OpenAI trả lời có citation `[1]`, `[2]`, ... như bảng trên. Filter được áp dụng trước retrieval, nhưng top-3 quan sát được chưa đổi vì các chunk `student` đã có điểm semantic cao nhất. Đây là giới hạn của bộ query hiện tại: để chứng minh lợi ích thứ hạng rõ hơn, nhóm cần một query mơ hồ hơn giữa `student` và `faculty/staff` có đáp án khác nhau.
 
 **Điều hay nhất tôi học được từ thành viên khác / nhóm khác (qua demo):**
 
-> Chunk theo heading giúp giữ các mục quy định như Voucher Process hoặc Start Time Assignments trọn nghĩa; khi section dài, heading vẫn được lặp lại trong các mảnh con. Tôi cũng học được rằng kiểm tra đúng `doc_id` là chưa đủ: phải đọc nội dung chunk để chắc rằng nó thật sự chứa câu trả lời, đặc biệt với tài liệu dài có nhiều section cùng chủ đề.
+> Fixed-size là baseline dễ so sánh vì số chunk và ranh giới được xác định rõ; overlap giúp câu 1 và 3 vẫn giữ được phần bối cảnh gần ranh giới. Tuy nhiên preview có thể bắt đầu giữa từ (ví dụ `dents who wish...`), nên kết quả đúng `doc_id` vẫn phải được kiểm tra ở mức nội dung chunk, không chỉ nhìn tên tài liệu.
 
 ---
 

@@ -252,7 +252,7 @@ def print_similarity_pairs(provider: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run the five university-services benchmark queries.")
-    parser.add_argument("--chunker", choices=["heading", "fixed", "sentence", "recursive"], default="heading")
+    parser.add_argument("--chunker", choices=["heading", "fixed", "sentence", "recursive"], default="fixed")
     parser.add_argument("--provider", choices=["openai", "local", "gemini", "mock"], default="openai")
     parser.add_argument(
         "--filter-mode",

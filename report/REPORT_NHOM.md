@@ -94,8 +94,8 @@ tạo 42 chunks có thể truy vết theo `source_file` và `chunk_index`.
 - **Code:** `scripts/evaluate_benchmarks.py:chunk_by_heading`.
 
 **Thành viên 2 — Nguyễn Chí Công (2A202602634)**
-- **Loại chiến lược:** [Cần xác nhận chiến lược đã chạy]
-- **Mô tả & lý do chọn:** [Cần bổ sung kết quả thực nghiệm cá nhân]
+- **Loại chiến lược:** `FixedSizeChunker(chunk_size=500, overlap=50)`
+- **Mô tả & lý do chọn:** Chia theo độ dài cố định để làm baseline độc lập với chiến lược heading-aware của Vũ Đình Đăng. Overlap 50 ký tự giữ một phần ngữ cảnh ở biên chunk; benchmark OpenAI nạp 68 chunks và dùng cùng corpus, 5 query, `top_k=3` với các thành viên khác.
 
 **Thành viên 3 — Hoàng Trung Anh (2A202602521)**
 - **Loại chiến lược:** [Cần xác nhận chiến lược đã chạy]
