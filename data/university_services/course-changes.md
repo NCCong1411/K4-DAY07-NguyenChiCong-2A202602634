@@ -18,7 +18,7 @@ It is expected that students who are full-time after the add period retain full-
 
 Add, drop, withdrawal and pass/no pass election deadlines may be found on the official Academic Calendar.
 
-Timeline/Process Exceptions:
+Timeline/Process Exceptions
 
 Students with a pending or documented academic integrity violation may not drop the course or change the course to P/NP, including the use of a voucher. 
 
@@ -158,7 +158,7 @@ A voucher (either PNP or drop) may not be used once a course withdrawal (W grade
 
 Voucher elections, once confirmed by the student, are irreversible.
 
-Voucher Instructions:
+Voucher Instructions
 
 A student wishing to use a voucher to drop a course or switch to pass/no pass after the deadlines must first consult with their primary academic advisor. 
 

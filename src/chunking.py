@@ -134,15 +134,18 @@ class HeadingChunker:
         if not text or not text.strip():
             return []
 
+        # Keep each Markdown heading with the text that follows it.  The
+        # look-ahead preserves the heading itself, so it can be repeated on
+        # every child chunk created for a long section.
         sections = [
             section.strip()
-            for section in re.split(r"(?=^#{1,6}\\s+)", text.strip(), flags=re.MULTILINE)
+            for section in re.split(r"(?=^#{1,6}\s+)", text.strip(), flags=re.MULTILINE)
             if section.strip()
         ]
         chunks: list[str] = []
         for section in sections:
             heading, separator, body = section.partition("\n")
-            if not re.match(r"^#{1,6}\\s+", heading):
+            if not re.match(r"^#{1,6}\s+", heading):
                 chunks.extend(RecursiveChunker(chunk_size=self.chunk_size).chunk(section))
             elif len(section) <= self.chunk_size:
                 chunks.append(section)

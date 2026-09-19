@@ -14,6 +14,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from benchmark_eval import evaluate_results
 from src.agent import KnowledgeBaseAgent
 from main import parse_front_matter
 from src.chunking import (
@@ -38,34 +39,34 @@ AGENT_CACHE_PATH = PROJECT_DIR / ".cache" / "agent_answer_cache.json"
 # Exactly five shared queries.  Gold answers were copied from the cited source files.
 BENCHMARKS = [
     {
-        "query": "How many units make an undergraduate student full time?",
+        "query": "Quy trình đăng ký hai lớp trùng giờ là gì?",
         "gold_doc_id": "course-registration",
-        "gold_answer": "36 or more units.",
+        "gold_answer": "Gửi Course Time Conflict Request trên SIO; advisor và hai giảng viên phê duyệt, sau đó sinh viên chấp nhận điều kiện và đăng ký.",
         "metadata_filter": None,
     },
     {
-        "query": "What must a student do to request a course-time conflict?",
-        "gold_doc_id": "course-registration",
-        "gold_answer": "Submit the request in SIO; the advisor and instructors approve; the student accepts conditions.",
-        "metadata_filter": None,
-    },
-    {
-        "query": "What happens on the transcript after a course withdrawal?",
-        "gold_doc_id": "course-changes",
-        "gold_answer": "A W grade appears.",
-        "metadata_filter": None,
-    },
-    {
-        "query": "How are undergraduate registration start times assigned?",
+        "query": "Sinh viên đại học năm nhất đăng ký vào ngày nào trong kỳ thu/xuân?",
         "gold_doc_id": "registration-start-times",
-        "gold_answer": "Randomly from the last three ID-card digits, rotating through four time blocks.",
-        "metadata_filter": {"audience": "student"},
+        "gold_answer": "Thứ Sáu.",
+        "metadata_filter": None,
     },
     {
-        "query": "When must a non-degree staff member submit a petition, and can they receive drop vouchers?",
-        "gold_doc_id": "staff-non-degree-registration",
-        "gold_answer": "By the first day of classes; no Drop Vouchers.",
+        "query": "Trước khi dùng voucher sau hạn drop/P/NP, sinh viên phải làm gì?",
+        "gold_doc_id": "course-changes",
+        "gold_answer": "Trao đổi với primary academic advisor; advisor nhập voucher vào S3, sinh viên xác nhận trong 24 giờ.",
         "metadata_filter": None,
+    },
+    {
+        "query": "Sinh viên đại học có bao nhiêu voucher trong toàn khóa và trong một kỳ?",
+        "gold_doc_id": "course-changes",
+        "gold_answer": "Ba voucher toàn khóa; tối đa một voucher mỗi kỳ, kể cả hè.",
+        "metadata_filter": None,
+    },
+    {
+        "query": "Nếu là sinh viên đại học, giờ đăng ký học phần được xếp theo ID Card hay phải đợi hết Registration Week?",
+        "gold_doc_id": "registration-start-times",
+        "gold_answer": "Dựa trên ba chữ số cuối ID Card; có thể đăng ký từ giờ được gán, không phải đợi hết Registration Week.",
+        "metadata_filter": {"audience": "student"},
     },
 ]
 
@@ -218,7 +219,17 @@ def run(chunker_name: str, provider: str, filter_mode: str = "on", with_agent: b
         print(f"Filter: {metadata_filter or 'none'}")
         for rank, result in enumerate(results, start=1):
             preview = result["content"].replace("\n", " ")[:180]
-            print(f"  {rank}. score={result['score']:.3f} doc_id={result['metadata']['doc_id']} :: {preview}...")
+            print(
+                f"  {rank}. score={result['score']:.3f} id={result['id']} "
+                f"doc_id={result['metadata']['doc_id']} :: {preview}..."
+            )
+        evaluation = evaluate_results(number, benchmark["gold_doc_id"], results)
+        print(
+            "  Check: "
+            f"gold_rank={evaluation['gold_rank']}; "
+            f"answer_in_context={evaluation['answer_in_context']}; "
+            f"retrieval_points={evaluation['retrieval_points']}/2"
+        )
         if llm_fn:
             agent = KnowledgeBaseAgent(FilteredStoreView(store, metadata_filter), llm_fn)
             print(f"Agent answer: {agent.answer(benchmark['query'], top_k=3)}")

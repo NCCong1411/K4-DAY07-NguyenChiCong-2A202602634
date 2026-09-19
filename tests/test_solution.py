@@ -25,6 +25,7 @@ _mock_embed = getattr(_m, '_mock_embed')
 FixedSizeChunker = getattr(_m, 'FixedSizeChunker')
 SentenceChunker = getattr(_m, 'SentenceChunker')
 RecursiveChunker = getattr(_m, 'RecursiveChunker')
+HeadingChunker = getattr(_m, 'HeadingChunker')
 ChunkingStrategyComparator = getattr(_m, 'ChunkingStrategyComparator')
 MockEmbedder = getattr(_m, 'MockEmbedder')
 template = _m
@@ -142,6 +143,21 @@ class TestRecursiveChunker(unittest.TestCase):
         text = "paragraph one\n\nparagraph two\n\nparagraph three"
         chunks = RecursiveChunker(separators=["\n\n"], chunk_size=200).chunk(text)
         self.assertGreaterEqual(len(chunks), 1)
+
+
+class TestHeadingChunker(unittest.TestCase):
+
+    def test_splits_at_markdown_heading(self):
+        text = "# First\nFirst content.\n\n## Second\nSecond content."
+        chunks = HeadingChunker(chunk_size=200).chunk(text)
+        self.assertEqual(chunks, ["# First\nFirst content.", "## Second\nSecond content."])
+
+    def test_repeats_heading_for_long_section(self):
+        text = "# Rules\n" + ("word " * 40)
+        chunks = HeadingChunker(chunk_size=60).chunk(text)
+        self.assertGreater(len(chunks), 1)
+        self.assertTrue(all(chunk.startswith("# Rules\n") for chunk in chunks))
+        self.assertTrue(all(len(chunk) <= 60 for chunk in chunks))
 
 
 class TestEmbeddingStore(unittest.TestCase):

@@ -1,0 +1,169 @@
+CP6 backend: local (sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)
+Corpus: 9 documents; top_k=3; same five queries for all strategies.
+Retrieval points: 2 = gold at top-1 plus all answer phrases; 1 = gold at top-2/3 plus all phrases; otherwise 0.
+Agent answers were not run; retrieval points are not the full rubric score.
+
+=== FixedSizeChunker {'chunk_size': 500, 'overlap': 50} ===
+Chunks: 68; avg_length=472.2; max_length=500
+Q1 [unfiltered] Quy trình đăng ký hai lớp trùng giờ là gì?
+  1. registration-start-times#4 doc_id=registration-start-times audience=student score=0.580
+     placed into earlier time assignments on their designated registration day; Students with higher cumulative units passed are placed earlier in their existing time assignments in order to acco
+  2. registration-start-times#3 doc_id=registration-start-times audience=student score=0.528
+     ar students register on Monday, third-years register on Wednesday, second-years register on Thursday, and first-years register on Friday. Students may register any time after their assigned 
+  3. course-registration#5 doc_id=course-registration audience=student score=0.520
+     dents who wish to register for two course sections with overlapping meeting times must submit a Course Time Conflict Request through Student Information Online (SIO). Approval does not guara
+  doc_hit=True; gold_rank=3; answer_in_context=False; retrieval_points=0/2
+  missing=advisor will either approve or deny; instructors of the conflicting course sections; conditions are accepted
+Q2 [unfiltered] Sinh viên đại học năm nhất đăng ký vào ngày nào trong kỳ thu/xuân?
+  1. registration-start-times#3 doc_id=registration-start-times audience=student score=0.641
+     ar students register on Monday, third-years register on Wednesday, second-years register on Thursday, and first-years register on Friday. Students may register any time after their assigned 
+  2. course-registration#2 doc_id=course-registration audience=student score=0.619
+     s, and PhD students is available on the Start Time Assignments webpage. Class Level & Enrollment Status Undergraduate students are considered full time if registered for 36 or more units. St
+  3. registration-start-times#4 doc_id=registration-start-times audience=student score=0.610
+     placed into earlier time assignments on their designated registration day; Students with higher cumulative units passed are placed earlier in their existing time assignments in order to acco
+  doc_hit=True; gold_rank=1; answer_in_context=True; retrieval_points=2/2
+Q3 [unfiltered] Trước khi dùng voucher sau hạn drop/P/NP, sinh viên phải làm gì?
+  1. course-changes#13 doc_id=course-changes audience=student score=0.720
+     rted) and may use only one voucher per semester (including summer). Doctoral students, visiting/non-degree students, and certificate students do not receive vouchers and do not participate i
+  2. course-changes#3 doc_id=course-changes audience=student score=0.703
+     valent of "P" grades and vice versa. Doctoral students, visiting/non-degree students, and certificate students do not receive vouchers and do not participate in the voucher process. Add/Drop
+  3. course-changes#14 doc_id=course-changes audience=student score=0.678
+     irmed by the student, are irreversible. Voucher Instructions A student wishing to use a voucher to drop a course or switch to pass/no pass after the deadlines must first consult with their p
+  doc_hit=True; gold_rank=1; answer_in_context=False; retrieval_points=0/2
+  missing=within 24 hours
+Q4 [unfiltered] Sinh viên đại học có bao nhiêu voucher trong toàn khóa và trong một kỳ?
+  1. course-changes#13 doc_id=course-changes audience=student score=0.716
+     rted) and may use only one voucher per semester (including summer). Doctoral students, visiting/non-degree students, and certificate students do not receive vouchers and do not participate i
+  2. course-changes#12 doc_id=course-changes audience=student score=0.686
+     r exceptional or extenuating circumstances; they cannot be used to drop below full-time status (36 units); and they cannot be used for courses from which a student has already withdrawn. Und
+  3. course-changes#3 doc_id=course-changes audience=student score=0.607
+     valent of "P" grades and vice versa. Doctoral students, visiting/non-degree students, and certificate students do not receive vouchers and do not participate in the voucher process. Add/Drop
+  doc_hit=True; gold_rank=1; answer_in_context=True; retrieval_points=2/2
+Q5 [unfiltered] Nếu là sinh viên đại học, giờ đăng ký học phần được xếp theo ID Card hay phải đợi hết Registration Week?
+  1. registration-start-times#3 doc_id=registration-start-times audience=student score=0.667
+     ar students register on Monday, third-years register on Wednesday, second-years register on Thursday, and first-years register on Friday. Students may register any time after their assigned 
+  2. registration-four-steps#8 doc_id=registration-four-steps audience=student score=0.643
+     ou can begin registering for courses, you can continue registering until the start of the next semester's classes. If you have a registration hold, your registration start time will not appe
+  3. registration-start-times#4 doc_id=registration-start-times audience=student score=0.635
+     placed into earlier time assignments on their designated registration day; Students with higher cumulative units passed are placed earlier in their existing time assignments in order to acco
+  doc_hit=True; gold_rank=1; answer_in_context=False; retrieval_points=0/2
+  missing=last three digits
+Q5 [audience=student] Nếu là sinh viên đại học, giờ đăng ký học phần được xếp theo ID Card hay phải đợi hết Registration Week?
+  1. registration-start-times#3 doc_id=registration-start-times audience=student score=0.667
+     ar students register on Monday, third-years register on Wednesday, second-years register on Thursday, and first-years register on Friday. Students may register any time after their assigned 
+  2. registration-four-steps#8 doc_id=registration-four-steps audience=student score=0.643
+     ou can begin registering for courses, you can continue registering until the start of the next semester's classes. If you have a registration hold, your registration start time will not appe
+  3. registration-start-times#4 doc_id=registration-start-times audience=student score=0.635
+     placed into earlier time assignments on their designated registration day; Students with higher cumulative units passed are placed earlier in their existing time assignments in order to acco
+  doc_hit=True; gold_rank=1; answer_in_context=False; retrieval_points=0/2
+  missing=last three digits
+SUMMARY FixedSizeChunker: doc_hits=5/5; content_hits=2/5; retrieval_points=4/10 (unfiltered Q1-Q5)
+
+=== SentenceChunker {'max_sentences_per_chunk': 3} ===
+Chunks: 75; avg_length=385.8; max_length=1148
+Q1 [unfiltered] Quy trình đăng ký hai lớp trùng giờ là gì?
+  1. registration-start-times#3 doc_id=registration-start-times audience=student score=0.523
+     Students may register any time after their assigned registration start time. For Masters Students Registration start time assignments are randomly decided. To ensure masters students who are
+  2. plan-course-schedule#0 doc_id=plan-course-schedule audience=student score=0.508
+     # Plan Course Schedule The University Registrar's Office collects course offerings from our academic departments to create the Schedule of Classes (SOC) each semester. Students may use the P
+  3. course-registration#0 doc_id=course-registration audience=student score=0.489
+     # Course Registration The University Registrar's Office manages the registration process and related activities for all CMU students. Our goal is that our online services make these processe
+  doc_hit=True; gold_rank=3; answer_in_context=False; retrieval_points=0/2
+  missing=Course Time Conflict Request; advisor will either approve or deny; instructors of the conflicting course sections; conditions are accepted
+Q2 [unfiltered] Sinh viên đại học năm nhất đăng ký vào ngày nào trong kỳ thu/xuân?
+  1. registration-start-times#4 doc_id=registration-start-times audience=student score=0.574
+     (EST) in order to allow the students to be spread out in smaller groups every 15 minutes throughout the day. During fall and spring registration week, masters students register on Tuesday an
+  2. registration-start-times#2 doc_id=registration-start-times audience=student score=0.570
+     For example: Semester 1: Student assigned to time block 4 (the latest group) Semester 2: Student moves to time block 3 Semester 3: Student moves to time block 2 Semester 4: Student moves to 
+  3. registration-start-times#3 doc_id=registration-start-times audience=student score=0.554
+     Students may register any time after their assigned registration start time. For Masters Students Registration start time assignments are randomly decided. To ensure masters students who are
+  doc_hit=True; gold_rank=1; answer_in_context=True; retrieval_points=2/2
+Q3 [unfiltered] Trước khi dùng voucher sau hạn drop/P/NP, sinh viên phải làm gì?
+  1. course-changes#14 doc_id=course-changes audience=student score=0.788
+     LATE DROP: Students who wish to elect to switch to P/NP for a course after the P/NP deadline must consult with their academic advisor to use a voucher. Voucher Process The voucher process wa
+  2. course-changes#16 doc_id=course-changes audience=student score=0.747
+     Doctoral students, visiting/non-degree students, and certificate students do not receive vouchers and do not participate in the voucher process. Eligible students may elect to use a voucher 
+  3. course-changes#1 doc_id=course-changes audience=student score=0.668
+     Students are not allowed to use vouchers to drop below full-time status. Add, drop, withdrawal and pass/no pass election deadlines may be found on the official Academic Calendar. Timeline/Pr
+  doc_hit=True; gold_rank=1; answer_in_context=False; retrieval_points=0/2
+  missing=primary academic advisor; Student Services Suite (S3); within 24 hours
+Q4 [unfiltered] Sinh viên đại học có bao nhiêu voucher trong toàn khóa và trong một kỳ?
+  1. course-changes#15 doc_id=course-changes audience=student score=0.665
+     Vouchers are not intended to be used for exceptional or extenuating circumstances; they cannot be used to drop below full-time status (36 units); and they cannot be used for courses from whi
+  2. course-changes#16 doc_id=course-changes audience=student score=0.654
+     Doctoral students, visiting/non-degree students, and certificate students do not receive vouchers and do not participate in the voucher process. Eligible students may elect to use a voucher 
+  3. faculty-staff-non-degree-registration#11 doc_id=faculty-staff-non-degree-registration audience=faculty score=0.583
+     A technology fee is assessed but removed after tuition benefits are approved. Faculty registered for 19 or more units remain responsible for the Student Activities Fee, even with tuition rem
+  doc_hit=True; gold_rank=1; answer_in_context=True; retrieval_points=2/2
+Q5 [unfiltered] Nếu là sinh viên đại học, giờ đăng ký học phần được xếp theo ID Card hay phải đợi hết Registration Week?
+  1. registration-start-times#3 doc_id=registration-start-times audience=student score=0.620
+     Students may register any time after their assigned registration start time. For Masters Students Registration start time assignments are randomly decided. To ensure masters students who are
+  2. faculty-staff-non-degree-registration#12 doc_id=faculty-staff-non-degree-registration audience=faculty score=0.596
+     Otherwise, you will receive a letter grade for the course. Please note that you will still have to apply tuition benefits toward courses taken pass/no pass and audited courses, and that you 
+  3. registration-start-times#4 doc_id=registration-start-times audience=student score=0.592
+     (EST) in order to allow the students to be spread out in smaller groups every 15 minutes throughout the day. During fall and spring registration week, masters students register on Tuesday an
+  doc_hit=True; gold_rank=1; answer_in_context=False; retrieval_points=0/2
+  missing=last three digits
+Q5 [audience=student] Nếu là sinh viên đại học, giờ đăng ký học phần được xếp theo ID Card hay phải đợi hết Registration Week?
+  1. registration-start-times#3 doc_id=registration-start-times audience=student score=0.620
+     Students may register any time after their assigned registration start time. For Masters Students Registration start time assignments are randomly decided. To ensure masters students who are
+  2. registration-start-times#4 doc_id=registration-start-times audience=student score=0.592
+     (EST) in order to allow the students to be spread out in smaller groups every 15 minutes throughout the day. During fall and spring registration week, masters students register on Tuesday an
+  3. registration-start-times#1 doc_id=registration-start-times audience=student score=0.585
+     Student last/family names are not used for start time assignments. Registration start time assignments are randomly decided (using the last three digits of students ID Card numbers) and stud
+  doc_hit=True; gold_rank=1; answer_in_context=True; retrieval_points=2/2
+SUMMARY SentenceChunker: doc_hits=5/5; content_hits=2/5; retrieval_points=4/10 (unfiltered Q1-Q5)
+
+=== RecursiveChunker {'separators': ['\n\n', '\n', '. ', ' ', ''], 'chunk_size': 500} ===
+Chunks: 75; avg_length=388.8; max_length=499
+Q1 [unfiltered] Quy trình đăng ký hai lớp trùng giờ là gì?
+  1. registration-start-times#4 doc_id=registration-start-times audience=student score=0.537
+     Registration start time assignments are randomly decided. To ensure masters students who are close to graduating are able to register earlier: Students with closely approaching expected grad
+  2. plan-course-schedule#4 doc_id=plan-course-schedule audience=student score=0.516
+     Once registration week begins, you will register for courses within SIO. Information about registration start times and a step-by-step guide to the registration process are available on the 
+  3. registration-start-times#3 doc_id=registration-start-times audience=student score=0.515
+     The day on which students register depends on their enrollment status. For fall and spring registration, fourth and fifth-year students register on Monday, third-years register on Wednesday,
+  doc_hit=False; gold_rank=None; answer_in_context=False; retrieval_points=0/2
+  missing=Course Time Conflict Request; advisor will either approve or deny; instructors of the conflicting course sections; conditions are accepted
+Q2 [unfiltered] Sinh viên đại học năm nhất đăng ký vào ngày nào trong kỳ thu/xuân?
+  1. registration-start-times#3 doc_id=registration-start-times audience=student score=0.720
+     The day on which students register depends on their enrollment status. For fall and spring registration, fourth and fifth-year students register on Monday, third-years register on Wednesday,
+  2. course-changes#2 doc_id=course-changes audience=student score=0.560
+     Students with a pending or documented academic integrity violation may not drop the course or change the course to P/NP, including the use of a voucher. Doctoral course-sections follow a sep
+  3. faculty-staff-non-degree-registration#9 doc_id=faculty-staff-non-degree-registration audience=faculty score=0.555
+     Spring Semester: Nov. 15 - First Day of Spring Classes Summer Semester: March 15 - First Day of Classes View the Academic Calendar Tuition Benefits Eligible faculty may use tuition benefits 
+  doc_hit=True; gold_rank=1; answer_in_context=True; retrieval_points=2/2
+Q3 [unfiltered] Trước khi dùng voucher sau hạn drop/P/NP, sinh viên phải làm gì?
+  1. course-changes#15 doc_id=course-changes audience=student score=0.763
+     Eligible students may elect to use a voucher up to and including the last day of classes each semester. A voucher (either PNP or drop) may not be used once a course withdrawal (W grade) has 
+  2. course-changes#12 doc_id=course-changes audience=student score=0.747
+     Students who wish to elect to switch to P/NP for a course after the P/NP deadline must consult with their academic advisor to use a voucher. Voucher Process The voucher process was implement
+  3. course-changes#7 doc_id=course-changes audience=student score=0.658
+     LATE DROP: Students who wish to drop a course after the drop deadline must consult with their academic advisor to use a voucher. Course Withdrawal DEADLINE: Fall & Spring Semesters: Monday a
+  doc_hit=True; gold_rank=1; answer_in_context=False; retrieval_points=0/2
+  missing=Student Services Suite (S3); within 24 hours
+Q4 [unfiltered] Sinh viên đại học có bao nhiêu voucher trong toàn khóa và trong một kỳ?
+  1. course-changes#14 doc_id=course-changes audience=student score=0.768
+     Undergraduate students are permitted three vouchers over the course of their undergraduate career and may use only one voucher per semester (including summer). Master’s students are permitte
+  2. course-changes#1 doc_id=course-changes audience=student score=0.600
+     It is expected that students who are full-time after the add period retain full-time status (36 units) unless there are extenuating circumstances. In order to drop below full-time, students 
+  3. course-changes#15 doc_id=course-changes audience=student score=0.593
+     Eligible students may elect to use a voucher up to and including the last day of classes each semester. A voucher (either PNP or drop) may not be used once a course withdrawal (W grade) has 
+  doc_hit=True; gold_rank=1; answer_in_context=True; retrieval_points=2/2
+Q5 [unfiltered] Nếu là sinh viên đại học, giờ đăng ký học phần được xếp theo ID Card hay phải đợi hết Registration Week?
+  1. registration-start-times#3 doc_id=registration-start-times audience=student score=0.653
+     The day on which students register depends on their enrollment status. For fall and spring registration, fourth and fifth-year students register on Monday, third-years register on Wednesday,
+  2. registration-start-times#4 doc_id=registration-start-times audience=student score=0.617
+     Registration start time assignments are randomly decided. To ensure masters students who are close to graduating are able to register earlier: Students with closely approaching expected grad
+  3. registration-start-times#1 doc_id=registration-start-times audience=student score=0.616
+     Registration start time assignments are randomly decided (using the last three digits of students ID Card numbers) and students rotate among four time blocks (the best time block is 1, or ea
+  doc_hit=True; gold_rank=1; answer_in_context=True; retrieval_points=2/2
+Q5 [audience=student] Nếu là sinh viên đại học, giờ đăng ký học phần được xếp theo ID Card hay phải đợi hết Registration Week?
+  1. registration-start-times#3 doc_id=registration-start-times audience=student score=0.653
+     The day on which students register depends on their enrollment status. For fall and spring registration, fourth and fifth-year students register on Monday, third-years register on Wednesday,
+  2. registration-start-times#4 doc_id=registration-start-times audience=student score=0.617
+     Registration start time assignments are randomly decided. To ensure masters students who are close to graduating are able to register earlier: Students with closely approaching expected grad
+  3. registration-start-times#1 doc_id=registration-start-times audience=student score=0.616
+     Registration start time assignments are randomly decided (using the last three digits of students ID Card numbers) and students rotate among four time blocks (the best time block is 1, or ea
+  doc_hit=True; gold_rank=1; answer_in_context=True; retrieval_points=2/2
+SUMMARY RecursiveChunker: doc_hits=4/5; content_hits=3/5; retrieval_points=6/10 (unfiltered Q1-Q5)

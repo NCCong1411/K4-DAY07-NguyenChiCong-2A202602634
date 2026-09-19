@@ -53,9 +53,13 @@ Giải thích cách tiếp cận của bạn khi lập trình (implement) các p
 
 ### Các hàm chia nhỏ (Chunking Functions)
 
-**`FixedSizeChunker.chunk`** — chiến lược tôi dùng khi benchmark:
+**`FixedSizeChunker.chunk`** — đường cơ sở kỹ thuật:
 
-> Tôi dùng `chunk_size=500` và `overlap=50`: mỗi chunk có độ dài ổn định, còn 50 ký tự chồng lấp giữ một phần ngữ cảnh ở ranh giới. Đây là baseline công bằng để so sánh trực tiếp với chunk theo heading của thành viên khác; nhược điểm là chunk vẫn có thể bắt đầu hoặc kết thúc giữa từ/câu.
+> `FixedSizeChunker(chunk_size=500, overlap=50)` là đường cơ sở để so sánh. Mỗi chunk có độ dài ổn định, còn 50 ký tự chồng lấp giữ một phần ngữ cảnh ở ranh giới; đổi lại chunk vẫn có thể bắt đầu hoặc kết thúc giữa từ/câu. Đây không phải chiến lược benchmark cá nhân cuối cùng của tôi.
+
+**`HeadingChunker` → `RecursiveChunker(chunk_size=500)`** — chiến lược benchmark cá nhân:
+
+> Tôi tách Markdown theo heading trước để mỗi section là một đơn vị ngữ nghĩa. Nếu một section dài hơn 500 ký tự, `HeadingChunker` gọi `RecursiveChunker` trên phần thân và lặp heading ở đầu mỗi chunk con. Vì vậy mọi chunk không quá 500 ký tự nhưng vẫn cho biết chủ đề/mục mà nó thuộc về. Điểm mạnh là bảo toàn ngữ cảnh của quy trình hoặc quy định có cấu trúc; giới hạn là corpus hiện tại có ít heading phụ, nên với các tài liệu chỉ có tiêu đề cấp `#`, kết quả gần với RecursiveChunker có thêm tiêu đề lặp lại.
 
 **`SentenceChunker.chunk`** — hướng tiếp cận:
 
@@ -111,6 +115,8 @@ tests/test_solution.py::TestRecursiveChunker::test_chunks_within_size_when_possi
 tests/test_solution.py::TestRecursiveChunker::test_empty_separators_falls_back_gracefully PASSED
 tests/test_solution.py::TestRecursiveChunker::test_handles_double_newline_separator PASSED
 tests/test_solution.py::TestRecursiveChunker::test_returns_list PASSED
+tests/test_solution.py::TestHeadingChunker::test_repeats_heading_for_long_section PASSED
+tests/test_solution.py::TestHeadingChunker::test_splits_at_markdown_heading PASSED
 tests/test_solution.py::TestEmbeddingStore::test_add_documents_increases_size PASSED
 tests/test_solution.py::TestEmbeddingStore::test_add_more_increases_further PASSED
 tests/test_solution.py::TestEmbeddingStore::test_initial_size_is_zero PASSED
@@ -134,10 +140,12 @@ tests/test_solution.py::TestEmbeddingStoreSearchWithFilter::test_returns_at_most
 tests/test_solution.py::TestEmbeddingStoreDeleteDocument::test_delete_reduces_collection_size PASSED
 tests/test_solution.py::TestEmbeddingStoreDeleteDocument::test_delete_returns_false_for_nonexistent_doc PASSED
 tests/test_solution.py::TestEmbeddingStoreDeleteDocument::test_delete_returns_true_for_existing_doc PASSED
-============================== 42 passed in 0.06s ==============================
+tests/test_benchmark_eval.py::test_answer_can_span_two_retrieved_gold_chunks PASSED
+tests/test_benchmark_eval.py::test_gold_document_without_answer_scores_zero PASSED
+============================== 46 passed ==============================
 ```
 
-**Số lượng bài test vượt qua (pass):** 42 / 42
+**Số lượng bài test vượt qua (pass):** 46 / 46
 
 ---
 
@@ -161,21 +169,33 @@ tests/test_solution.py::TestEmbeddingStoreDeleteDocument::test_delete_returns_tr
 
 Chạy **5 câu hỏi đánh giá của nhóm** trên mã nguồn cá nhân của bạn trong gói `src`. **5 câu hỏi này phải trùng với các thành viên cùng nhóm** (xem `REPORT_NHOM.md`).
 
-| #   | Câu hỏi (Query) | Top-1 Chunk truy xuất được (tóm tắt) | Điểm Score | Có liên quan không? (Relevant) | Câu trả lời của Agent (tóm tắt) |
-| --- | --------------- | ------------------------------------ | ---------- | ------------------------------ | ------------------------------- |
-| 1 | How many units make an undergraduate student full time? | `course-registration`: “full time if registered for 36 or more units”. | 0.511 | Có, top-1 chứa đúng con số. | Agent: 36 units hoặc nhiều hơn `[1]`. |
-| 2 | What must a student do to request a course-time conflict? | `course-registration`: request SIO, advisor/instructor approvals và conditions. | 0.751 | Có, cả top-1 đến top-3 đều là section liên quan. | Agent: gửi request SIO; advisor rồi instructors phê duyệt; chấp nhận conditions `[1][2][3]`. |
-| 3 | What happens on the transcript after a course withdrawal? | `course-changes`: “A W grade appears on the transcript”. | 0.623 | Có, top-1 chứa đáp án nguyên văn. | Agent: xuất hiện điểm W trên transcript `[1]`. |
-| 4 | How are undergraduate registration start times assigned? | `registration-start-times`: ba số cuối ID Card và bốn time blocks. | 0.745 | Có, top-1 đến top-3 đều chứa quy tắc gán. | Agent: gán ngẫu nhiên theo ba số cuối ID Card, xoay vòng bốn time blocks `[1][2]`. |
-| 5 | When must a non-degree staff member submit a petition, and can they receive drop vouchers? | Top-1 là tài liệu faculty/staff tương tự; gold `staff-non-degree-registration` ở top-2. | 0.598 (gold: 0.596) | Có ở top-2; agent dùng đúng staff source. | Agent: nộp petition trước ngày đầu lớp; staff non-degree không nhận Drop Vouchers `[2][1]`. |
+| # | Câu hỏi chung | Gold `doc_id` | Thiết lập bắt buộc khi chạy |
+| --- | --- | --- | --- |
+| 1 | Quy trình đăng ký hai lớp trùng giờ là gì? | `course-registration` | không lọc |
+| 2 | Sinh viên đại học năm nhất đăng ký vào ngày nào trong kỳ thu/xuân? | `registration-start-times` | không lọc |
+| 3 | Trước khi dùng voucher sau hạn drop/P/NP, sinh viên phải làm gì? | `course-changes` | không lọc |
+| 4 | Sinh viên đại học có bao nhiêu voucher trong toàn khóa và trong một kỳ? | `course-changes` | không lọc |
+| 5 | Nếu là sinh viên đại học, giờ đăng ký học phần được xếp theo ID Card hay phải đợi hết Registration Week? | `registration-start-times` | chạy A/B: không lọc và `metadata_filter={"audience": "student"}` |
 
-**Bao nhiêu câu hỏi trả về chunk có liên quan trong top-3?** 5 / 5
+**Thiết lập đã kiểm chứng:** `HeadingChunker(chunk_size=500)` tạo 81 chunks từ 9 tài liệu; chunk dài nhất 498 ký tự và không có chunk nào vượt giới hạn 500. `bench.py --chunker heading` đã được cấu hình đúng năm câu hỏi chung và filter của câu 5. Hai test riêng xác minh việc tách ở heading và lặp heading với section dài.
 
-**Thiết lập & kiểm tra A/B:** Tôi dùng `FixedSizeChunker(chunk_size=500, overlap=50)`, `text-embedding-3-small`, 68 chunks và top_k=3. Tôi chạy đúng 5 query/gold answer chung của `REPORT_NHOM.md`. Query 4 chạy cả `metadata_filter={"audience": "student"}` và không filter; output đầy đủ ở `ket_qua_benchmark.txt`. Tôi cũng chạy `python bench.py --chunker fixed --filter-mode on --with-agent`; agent OpenAI trả lời có citation `[1]`, `[2]`, ... như bảng trên. Filter được áp dụng trước retrieval; ở corpus nhỏ này top-3 Q4 chưa đổi vì các chunk student đã đứng đầu sẵn. Failure case của FixedSize là Q5: chunk faculty/staff có chủ đề rất gần đứng top-1 (0.598), còn staff gold đứng top-2 (0.596); đề xuất là thêm metadata filter `audience=staff` khi ngữ cảnh người hỏi được biết.
+**Kết quả retrieval và agent:** Chạy `python bench.py --chunker heading --provider openai --filter-mode on --with-agent` với `text-embedding-3-small`, `top_k=3`.
+
+| # | Top-3 / kết quả đối chiếu | Điểm retrieval tạm | Agent |
+| --- | --- | --- | --- |
+| 1 | Không có `course-registration` trong top-3; top-3 đều là `registration-start-times`. | 0/2 | Agent nói không tìm thấy căn cứ trong context. |
+| 2 | `registration-start-times#3` hạng 1, chứa “first-years register on Friday”. | 2/2 | Trả lời Thứ Sáu, citation `[1]`. |
+| 3 | `course-changes#12` hạng 1, nhưng top-3 không chứa bước S3 và xác nhận trong 24 giờ. | 0/2 | Chỉ nêu phải hỏi advisor `[1]`, thiếu phần còn lại. |
+| 4 | `course-changes#14` hạng 1, chứa ba voucher toàn khóa và tối đa một voucher mỗi kỳ. | 2/2 | Trả lời đúng, citation `[1]`. |
+| 5 | `registration-start-times#3` và `#0` trong top-3, đủ ngày/giờ đăng ký và quy tắc ID Card. | 2/2 | Trả lời đúng, citation `[3]`. |
+
+**Tổng retrieval:** 6/10. Điểm này đã kiểm tra cả căn cứ trong top-3 và câu trả lời agent có citation.
+
+**Kiểm tra A/B metadata:** Câu 5 chạy cả không lọc và `metadata_filter={"audience": "student"}`. Với Heading → Recursive, ba kết quả đầu và thứ tự không đổi (`registration-start-times#3`, `course-registration#3`, `registration-start-times#1`), nên không thể khẳng định filter giúp chiến lược này; vẫn cần giữ query/filter này để so sánh công bằng với chiến lược khác.
 
 **Điều hay nhất tôi học được từ thành viên khác / nhóm khác (qua demo):**
 
-> Fixed-size là baseline dễ so sánh vì số chunk và ranh giới được xác định rõ; overlap giúp câu 1 và 3 vẫn giữ được phần bối cảnh gần ranh giới. Tuy nhiên preview có thể bắt đầu giữa từ (ví dụ `dents who wish...`), nên kết quả đúng `doc_id` vẫn phải được kiểm tra ở mức nội dung chunk, không chỉ nhìn tên tài liệu.
+> Heading → Recursive cho thấy cấu trúc tài liệu có thể được giữ lại trong từng chunk: heading được lặp lại khi section dài bị chia nhỏ. Tuy nhiên không được kết luận chiến lược tốt hơn chỉ từ cấu trúc; phải kiểm tra top-3 và câu trả lời agent trên cùng năm câu hỏi với các thành viên khác.
 
 ---
 
@@ -187,5 +207,5 @@ Chạy **5 câu hỏi đánh giá của nhóm** trên mã nguồn cá nhân củ
 | Hướng tiếp cận của tôi (My Approach)            | 10 / 10          |
 | Hoàn thiện code (Core Implementation — tests)   | 30 / 30          |
 | Dự đoán độ tương tự (Similarity Predictions)    | 5 / 5            |
-| Kết quả truy xuất của tôi (Competition Results) | 10 / 10          |
-| **Tổng phần cá nhân**                           | **60 / 60**      |
+| Kết quả truy xuất của tôi (Competition Results) | 6 / 10 |
+| **Tổng phần cá nhân**                           | **56 / 60** |

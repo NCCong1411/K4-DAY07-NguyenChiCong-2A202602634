@@ -14,7 +14,7 @@ language: "en"
 
 Students should carefully review the Course Changes webpage and consult with their primary academic advisors before initiating any voucher requests.
 
-What is the deadline for making a voucher request? 
+What is the deadline for making a voucher request?
 
 The University Registrar’s Office recommends making voucher requests as soon as possible, and no later than 4:30 p.m. on the day before last day of classes. If your primary academic advisor is unavailable to discuss your voucher elections, please consult with other resources within your academic department.
 
