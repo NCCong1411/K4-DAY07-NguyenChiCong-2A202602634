@@ -38,34 +38,34 @@ AGENT_CACHE_PATH = PROJECT_DIR / ".cache" / "agent_answer_cache.json"
 # Exactly five shared queries.  Gold answers were copied from the cited source files.
 BENCHMARKS = [
     {
-        "query": "What is the process for registering for two course sections with overlapping meeting times?",
+        "query": "How many units make an undergraduate student full time?",
         "gold_doc_id": "course-registration",
-        "gold_answer": "Submit a Course Time Conflict Request in SIO; the advisor and both instructors must approve, then the student accepts conditions and attempts registration.",
+        "gold_answer": "36 or more units.",
         "metadata_filter": None,
     },
     {
-        "query": "On which day do first-year undergraduate students register during fall and spring registration?",
-        "gold_doc_id": "registration-start-times",
-        "gold_answer": "Friday.",
+        "query": "What must a student do to request a course-time conflict?",
+        "gold_doc_id": "course-registration",
+        "gold_answer": "Submit the request in SIO; the advisor and instructors approve; the student accepts conditions.",
         "metadata_filter": None,
     },
     {
-        "query": "What should a student do before using a voucher after the course drop or P/NP deadline?",
+        "query": "What happens on the transcript after a course withdrawal?",
         "gold_doc_id": "course-changes",
-        "gold_answer": "Consult the primary academic advisor; after consultation the advisor enters the voucher in S3 and the student confirms the election within 24 hours.",
-        "metadata_filter": {"audience": "student"},
+        "gold_answer": "A W grade appears.",
+        "metadata_filter": None,
     },
     {
-        "query": "How many vouchers may an undergraduate use during their undergraduate career and in one semester?",
-        "gold_doc_id": "course-changes",
-        "gold_answer": "Three over the undergraduate career, with at most one per semester (including summer).",
-        "metadata_filter": {"audience": "student"},
-    },
-    {
-        "query": "Do I have a specific registration start time?",
+        "query": "How are undergraduate registration start times assigned?",
         "gold_doc_id": "registration-start-times",
-        "gold_answer": "For students, start time assignments are viewable on the Registration or Plan Schedule page in SIO; undergraduate assignments use the last three digits of the ID Card number.",
+        "gold_answer": "Randomly from the last three ID-card digits, rotating through four time blocks.",
         "metadata_filter": {"audience": "student"},
+    },
+    {
+        "query": "When must a non-degree staff member submit a petition, and can they receive drop vouchers?",
+        "gold_doc_id": "staff-non-degree-registration",
+        "gold_answer": "By the first day of classes; no Drop Vouchers.",
+        "metadata_filter": None,
     },
 ]
 
